@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://r0kfsi267kgk"]
+
+[ext_resource type="Script" path="res://discord_bot.gd" id="1_x7vin"]
+
+[node name="DiscordBot" type="Node" node_paths=PackedStringArray("http_request")]
+script = ExtResource("1_x7vin")
+token = "N27VoKAJQRXMj6ND3vFXHu7KLF93is4L"
+http_request = NodePath("HTTPRequest")
+
+[node name="HTTPRequest" type="HTTPRequest" parent="."]
