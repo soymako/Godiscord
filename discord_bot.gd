@@ -5,7 +5,7 @@ extends Node
 signal message_recieved(message: DiscordMessage)
 
 var websocket: WebSocketPeer
-var bot_id: int
+var user: DiscordUser
 
 func _ready():
 	websocket = WebSocketPeer.new()
@@ -19,20 +19,25 @@ func _process(_delta):
 			var data = websocket.get_packet().get_string_from_utf8()
 			print("Packet: ", data)
 			var json = JSON.parse_string(data)
-			var file = FileAccess.open("test.json", FileAccess.WRITE)
-			file.store_string(data)
 			if json["op"] == 10:  # Hello
 				var heartbeat_interval = json["d"]["heartbeat_interval"] / 1000.0
 				send_identify()
 				start_heartbeat(heartbeat_interval)
 			elif json["op"] == 0 and json["t"] == "READY":
-				bot_id = int(json["d"]["user"]["id"])
-				print("Bot ID: ", bot_id)
+				user = DiscordUser.new()
+				user.id = int(json["d"]["user"]["id"])
+				user.name = json["d"]["user"]["username"]
 			elif json["op"] == 0 and json["t"] == "MESSAGE_CREATE":
-				var channel_id = json["d"]["channel_id"]
-				var author_id = int(json["d"]["author"]["id"])
-				if author_id != bot_id:
-					send_message(channel_id, "Hello! I received your message.")
+				var message = DiscordMessage.new()
+				message.content = json["d"]["content"]
+				message.author = DiscordUser.new()
+				message.author.id = int(json["d"]["author"]["id"])
+				message.channel = DiscordChannel.new()
+				message.channel.token = token
+				message.channel.id = int(json["d"]["channel_id"])
+				message.id = int(json["d"]["id"])
+
+				message_recieved.emit(message)
 	elif state == WebSocketPeer.STATE_CLOSING:
 		pass
 	elif state == WebSocketPeer.STATE_CLOSED:
@@ -60,16 +65,3 @@ func start_heartbeat(interval: float):
 	await get_tree().create_timer(interval).timeout
 	websocket.put_packet(JSON.stringify({"op": 1, "d": null}).to_utf8_buffer())
 	start_heartbeat(interval)
-
-func send_message(channel_id: String, content: String):
-	var url = "https://discord.com/api/v9/channels/%s/messages" % channel_id
-	var headers = [
-		"Authorization: Bot %s" % token,
-		"Content-Type: application/json"
-	]
-	var payload = {
-		"content": content
-	}
-	var http_request = HTTPRequest.new()
-	add_child(http_request)
-	http_request.request(url, headers, HTTPClient.METHOD_POST, JSON.stringify(payload))
