@@ -2,5 +2,11 @@
 
 [ext_resource type="Script" path="res://discord_bot.gd" id="1_x7vin"]
 
-[node name="DiscordBot" type="Node"]
+[node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="DiscordBot" type="Node" parent="."]
 script = ExtResource("1_x7vin")
