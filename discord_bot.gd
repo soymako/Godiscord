@@ -1,6 +1,6 @@
 extends Node
 
-@export var token: String = OS.get_environment("DISCORD_BOT_TOKEN")
+var token = OS.get_environment("DISCORD_BOT_TOKEN")
 
 var websocket: WebSocketPeer
 
