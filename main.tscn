@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3 uid="uid://r0kfsi267kgk"]
+
+[ext_resource type="Script" path="res://testing.gd" id="1_nw7a4"]
+[ext_resource type="Script" path="res://Discord/discord_bot.gd" id="2_sd81l"]
+
+[node name="Main" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_nw7a4")
+
+[node name="DiscordBot" type="Node" parent="."]
+script = ExtResource("2_sd81l")
+
+[connection signal="bot_ready" from="DiscordBot" to="." method="_on_discord_bot_bot_ready"]
+[connection signal="message_recieved" from="DiscordBot" to="." method="_on_discord_bot_message_recieved"]

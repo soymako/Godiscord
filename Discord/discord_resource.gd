@@ -1,4 +1,4 @@
 class_name DiscordResource
 extends Resource
 
-var token
+var token: String

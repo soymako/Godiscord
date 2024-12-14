@@ -1,22 +1,16 @@
-class_name DiscordMessage
-extends Resource
+class_name DiscordChannel
+extends DiscordResource
 
-var content: String
-var channel: DiscordChannel
-var author: DiscordUser
 var id: int
 
-func reply(content: String):
-	var url = "https://discord.com/api/v9/channels/%s/messages" % channel_id
+func send_message(content: String):
+	var url = "https://discord.com/api/v9/channels/%s/messages" % id
 	var headers = [
 		"Authorization: Bot %s" % token,
 		"Content-Type: application/json"
 	]
 	var payload = {
-		"content": content,
-		"message_reference": {
-			"message_id": message_id
-		}
+		"content": content
 	}
 	var http_request = HTTPRequest.new()
 	DiscordRequestHandler.add_child(http_request)

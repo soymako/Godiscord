@@ -1,5 +1,5 @@
 class_name DiscordUser
-extends Resource
+extends DiscordResource
 
 var name: String
 var id: int
