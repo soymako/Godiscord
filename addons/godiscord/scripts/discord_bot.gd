@@ -104,7 +104,7 @@ func _start_heartbeat(interval: float):
 ## func _on_discord_bot_bot_ready() -> void:
 ##     discord_bot.register_slash_command("hello", "Says hello")
 ## [/codeblock]
-## You can also register a slash command with options from
+## You can also register a list of slash command with options from
 ## [url=https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-structure]the docs[/url]:
 ## [codeblock]
 ## func _on_discord_bot_bot_ready() -> void:
