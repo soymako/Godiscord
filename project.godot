@@ -17,11 +17,11 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-DiscordRequestHandler="*res://Discord/discord_request_handler.gd"
+DiscordRequestHandler="*res://addons/godiscord/scripts/discord_request_handler.gd"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/godot_super-wakatime/plugin.cfg")
+enabled=PackedStringArray("res://addons/godiscord/plugin.cfg", "res://addons/godot_super-wakatime/plugin.cfg")
 
 [rendering]
 

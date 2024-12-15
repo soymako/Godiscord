@@ -1,7 +1,7 @@
 class_name DiscordBot
 extends Node
 
-@export var token: String = OS.get_environment("DISCORD_BOT_TOKEN")
+@export var token: String = ""
 
 signal message_recieved(message: DiscordMessage)
 signal command_used(command: DiscordCommandRequest)

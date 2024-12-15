@@ -1,6 +1,9 @@
-extends Control
+extends Node
 
 @onready var discord_bot: DiscordBot = $DiscordBot
+
+func _ready() -> void:
+	discord_bot.token = OS.get_environment("DISCORD_BOT_TOKEN")
 
 func _on_discord_bot_message_recieved(message: DiscordMessage) -> void:
 	if message.author.id != discord_bot.user.id:
