@@ -36,7 +36,9 @@ func _process(_delta):
 				message.content = json["d"]["content"]
 				message.author = DiscordUser.new()
 				message.author.id = int(json["d"]["author"]["id"])
-				message.author.name = json["d"]["author"]["global_name"]
+				# For some reason global_name returns null here
+				#message.author.global_name = json["d"]["author"]["global_name"]
+				message.author.name = json["d"]["author"]["username"]
 				message.channel = DiscordChannel.new()
 				message.channel.token = token
 				message.channel.id = int(json["d"]["channel_id"])
@@ -57,7 +59,8 @@ func _process(_delta):
 				command_request.name = json["d"]["data"]["name"]
 				command_request.caller = DiscordUser.new()
 				command_request.caller.id = json["d"]["member"]["user"]["id"]
-				command_request.caller.name = json["d"]["member"]["user"]["global_name"]
+				command_request.caller.global_name = json["d"]["member"]["user"]["global_name"]
+				command_request.caller.name = json["d"]["member"]["user"]["username"]
 				command_used.emit(command_request)
 	elif state == WebSocketPeer.STATE_CLOSING:
 		pass
