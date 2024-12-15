@@ -14,4 +14,5 @@ script = ExtResource("1_nw7a4")
 script = ExtResource("2_sd81l")
 
 [connection signal="bot_ready" from="DiscordBot" to="." method="_on_discord_bot_bot_ready"]
+[connection signal="command_used" from="DiscordBot" to="." method="_on_discord_bot_command_used"]
 [connection signal="message_recieved" from="DiscordBot" to="." method="_on_discord_bot_message_recieved"]
