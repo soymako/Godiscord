@@ -10,16 +10,13 @@ func _on_discord_bot_message_recieved(message: DiscordMessage) -> void:
 		message.reply("You said: " + message.content)
 
 func _on_discord_bot_bot_ready() -> void:
-	var options := [
-		{
-			"name": "option",
-			"description": "this is required",
+	var options = [{
+			"name": "pizza",
+			"description": "What's your favourite pizza flavour?",
 			"type": 3,
-			"required": true,
-		}
-	]
-	discord_bot.register_slash_command("hello", "Says hello", options)
-	discord_bot.register_slash_command("bye", "Says goodbye")
+			"required": false,
+		}]
+	discord_bot.register_slash_command("bye", "Says goodbye", options)
 
 
 func _on_discord_bot_command_used(command: DiscordCommandRequest) -> void:

@@ -1,30 +1,37 @@
 class_name DiscordBot
 extends Node
+## The main entry point for Godiscord
 
-@export var token: String = ""
+## Discord bot token used for Godiscord.
+## Create a bot at [url=https://discord.com/developers/applications]Discord Dev Portal[/url]
+@export var token: String
 
+## Emitted when a message is recieved.
 signal message_recieved(message: DiscordMessage)
+## Emitted when a slash command is used.
 signal command_used(command: DiscordCommandRequest)
+## Emitted when the bot is ready.
 signal bot_ready()
 
-var websocket: WebSocketPeer
+var _websocket: WebSocketPeer
+## The account of the bot. Use after [signal DiscordBot.bot_ready]
 var user: DiscordUser
 
 func _ready():
-	websocket = WebSocketPeer.new()
-	websocket.connect_to_url("wss://gateway.discord.gg/?v=9&encoding=json")
+	_websocket = WebSocketPeer.new()
+	_websocket.connect_to_url("wss://gateway.discord.gg/?v=9&encoding=json")
 
 func _process(_delta):
-	websocket.poll()
-	var state = websocket.get_ready_state()
+	_websocket.poll()
+	var state = _websocket.get_ready_state()
 	if state == WebSocketPeer.STATE_OPEN:
-		while websocket.get_available_packet_count():
-			var data = websocket.get_packet().get_string_from_utf8()
+		while _websocket.get_available_packet_count():
+			var data = _websocket.get_packet().get_string_from_utf8()
 			var json = JSON.parse_string(data)
 			if json["op"] == 10:  # Hello
 				var heartbeat_interval = json["d"]["heartbeat_interval"] / 1000.0
-				send_identify()
-				start_heartbeat(heartbeat_interval)
+				_send_identify()
+				_start_heartbeat(heartbeat_interval)
 			elif json["op"] == 0 and json["t"] == "READY":
 				user = DiscordUser.new()
 				user.id = int(json["d"]["user"]["id"])
@@ -65,12 +72,12 @@ func _process(_delta):
 	elif state == WebSocketPeer.STATE_CLOSING:
 		pass
 	elif state == WebSocketPeer.STATE_CLOSED:
-		var code = websocket.get_close_code()
-		var reason = websocket.get_close_reason()
+		var code = _websocket.get_close_code()
+		var reason = _websocket.get_close_reason()
 		print("WebSocket closed with code: %d, reason %s. Clean: %s" % [code, reason, code != -1])
 		set_process(false)
 
-func send_identify():
+func _send_identify():
 	var payload = {
 		"op": 2,
 		"d": {
@@ -83,13 +90,32 @@ func send_identify():
 			}
 		}
 	}
-	websocket.put_packet(JSON.stringify(payload).to_utf8_buffer())
+	_websocket.put_packet(JSON.stringify(payload).to_utf8_buffer())
 
-func start_heartbeat(interval: float):
+func _start_heartbeat(interval: float):
 	await get_tree().create_timer(interval).timeout
-	websocket.put_packet(JSON.stringify({"op": 1, "d": null}).to_utf8_buffer())
-	start_heartbeat(interval)
+	_websocket.put_packet(JSON.stringify({"op": 1, "d": null}).to_utf8_buffer())
+	_start_heartbeat(interval)
 
+## Register a slash command to the bot.
+## To handle the usage of commands, please read [DiscordCommandRequest].[br]
+## [b]Example:[/b]
+## [codeblock]
+## func _on_discord_bot_bot_ready() -> void:
+##     discord_bot.register_slash_command("hello", "Says hello")
+## [/codeblock]
+## You can also register a slash command with options from
+## [url=https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-structure]the docs[/url]:
+## [codeblock]
+## func _on_discord_bot_bot_ready() -> void:
+##     var options = [{
+##         "name": "pizza",
+##         "description": "What's your favourite pizza flavour?",
+##         "type": 3,
+##         "required": false,
+##     }]
+##     discord_bot.register_slash_command("bye", "Says goodbye", options)
+## [/codeblock]
 func register_slash_command(command_name: String, description: String, options: Array = []):
 	var url = "https://discord.com/api/v9/applications/%s/commands" % user.id
 	var headers = [

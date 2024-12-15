@@ -10,14 +10,20 @@ func _disable_plugin():
 
 
 func _enter_tree() -> void:
-	add_custom_type("DiscordResource", "Resource", preload("scripts/discord_resource.gd"), preload("res://icon.svg"))
-	add_custom_type("DiscordChannel", "DiscordResource", preload("scripts/discord_channel.gd"), preload("res://icon.svg"))
-	add_custom_type("DiscordCommand", "DiscordResource", preload("scripts/discord_command_request.gd"), preload("res://icon.svg"))
-	add_custom_type("DiscordMessage", "DiscordResource", preload("scripts/discord_message.gd"), preload("res://icon.svg"))
-	add_custom_type("DiscordUser", "DiscordResource", preload("scripts/discord_user.gd"), preload("res://icon.svg"))
+	add_custom_type("DiscordResource", "Resource", preload("scripts/discord_resource.gd"), preload("assets/discord_base.svg"))
+	add_custom_type("DiscordChannel", "DiscordResource", preload("scripts/discord_channel.gd"), preload("assets/discord_base.svg"))
+	add_custom_type("DiscordCommand", "DiscordResource", preload("scripts/discord_command_request.gd"), preload("assets/discord_base.svg"))
+	add_custom_type("DiscordMessage", "DiscordResource", preload("scripts/discord_message.gd"), preload("assets/discord_base.svg"))
+	add_custom_type("DiscordUser", "DiscordResource", preload("scripts/discord_user.gd"), preload("assets/discord_base.svg"))
 
-	add_custom_type("DiscordBot", "Node", preload("scripts/discord_bot.gd"), preload("res://icon.svg"))
+	add_custom_type("DiscordBot", "Node", preload("scripts/discord_bot.gd"), preload("assets/discord_base.svg"))
 
 
 func _exit_tree() -> void:
+	remove_custom_type("DiscordResource")
+	remove_custom_type("DiscordChannel")
+	remove_custom_type("DiscordCommand")
+	remove_custom_type("DiscordMessage")
+	remove_custom_type("DiscordUser")
+
 	remove_custom_type("DiscordBot")

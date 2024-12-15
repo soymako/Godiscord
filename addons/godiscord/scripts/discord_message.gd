@@ -1,5 +1,6 @@
 class_name DiscordMessage
 extends DiscordResource
+## A Discord message
 
 var content: String
 var channel: DiscordChannel

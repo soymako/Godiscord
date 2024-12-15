@@ -1,5 +1,6 @@
 class_name DiscordCommandRequest
 extends DiscordResource
+## Discord slash command request
 
 var interaction: Dictionary
 var name: String
