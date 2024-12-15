@@ -36,6 +36,7 @@ func _process(_delta):
 				message.content = json["d"]["content"]
 				message.author = DiscordUser.new()
 				message.author.id = int(json["d"]["author"]["id"])
+				message.author.name = json["d"]["author"]["global_name"]
 				message.channel = DiscordChannel.new()
 				message.channel.token = token
 				message.channel.id = int(json["d"]["channel_id"])
@@ -43,13 +44,20 @@ func _process(_delta):
 
 				message_recieved.emit(message)
 			elif json["op"] == 0 and json["t"] == "INTERACTION_CREATE":
+				var options = {}
+
+				if json["d"]["data"].has("options"):
+					for i in json["d"]["data"]["options"]:
+						options[i["name"]] = i["value"]
+
 				var command_request = DiscordCommandRequest.new()
+				command_request.options = options
 				command_request.token = token
 				command_request.interaction = json["d"]
 				command_request.name = json["d"]["data"]["name"]
 				command_request.caller = DiscordUser.new()
 				command_request.caller.id = json["d"]["member"]["user"]["id"]
-				command_request.caller.name = json["d"]["member"]["user"]["username"]
+				command_request.caller.name = json["d"]["member"]["user"]["global_name"]
 				command_used.emit(command_request)
 	elif state == WebSocketPeer.STATE_CLOSING:
 		pass
@@ -79,7 +87,7 @@ func start_heartbeat(interval: float):
 	websocket.put_packet(JSON.stringify({"op": 1, "d": null}).to_utf8_buffer())
 	start_heartbeat(interval)
 
-func register_slash_command(command_name: String, description: String, options: Array[Dictionary] = []):
+func register_slash_command(command_name: String, description: String, options: Array = []):
 	var url = "https://discord.com/api/v9/applications/%s/commands" % user.id
 	var headers = [
 		"Authorization: Bot %s" % token,

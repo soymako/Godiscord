@@ -3,11 +3,12 @@ extends DiscordResource
 
 var interaction: Dictionary
 var name: String
+var options: Dictionary
 var caller: DiscordUser
 
 func reply(content: String):
-	#var file = FileAccess.open("test.json", FileAccess.WRITE)
-	#file.store_string(JSON.stringify(interaction))
+	var file = FileAccess.open("test.json", FileAccess.WRITE)
+	file.store_string(JSON.stringify(interaction))
 	var url = "https://discord.com/api/v9/interactions/%s/%s/callback" % [interaction["id"], interaction["token"]]
 	var headers = [
 		"Authorization: Bot %s" % token,
