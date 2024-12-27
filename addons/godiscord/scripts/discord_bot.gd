@@ -17,6 +17,8 @@ var _websocket: WebSocketPeer
 ## The account of the bot. Use after [signal DiscordBot.bot_ready]
 var user: DiscordUser
 
+var intents: int = DiscordIntents.DEFAULT
+
 func _ready():
     _websocket = WebSocketPeer.new()
     _websocket.connect_to_url("wss://gateway.discord.gg/?v=9&encoding=json")
@@ -82,7 +84,7 @@ func _send_identify():
         "op": 2,
         "d": {
             "token": token,
-            "intents": 513,
+            "intents": intents,
             "properties": {
                 "$os": OS.get_name(),
                 "$browser": "godot",
