@@ -100,7 +100,10 @@ func _event_handler(payload: Dictionary):
 		# For some reason global_name returns null here
 		# ^- From kruz: maybe it is an intent?  I see my user when
 		# printing the global_name, but I'm using more intents
-		message.author.global_name = data["author"]["global_name"]
+		# ^- Shuflduf: Im not sure what intents youre using, so im 
+		# safeguard this a bit
+		if data["author"]["global_name"] != null:
+			message.author.global_name = data["author"]["global_name"]
 		message.author.name = data["author"]["username"]
 		message.channel = DiscordChannel.new()
 		message.channel.token = token
