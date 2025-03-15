@@ -140,6 +140,7 @@ func _event_handler(payload: Dictionary):
     command_request.caller.id = data["member"]["user"]["id"]
     command_request.caller.global_name = data["member"]["user"]["global_name"]
     command_request.caller.name = data["member"]["user"]["username"]
+    command_request.caller.mention = "<@%s>" % command_request.caller.id
     command_used.emit(command_request)
     
 func _heartbeat():
