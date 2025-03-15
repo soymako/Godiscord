@@ -174,7 +174,7 @@ func _start_heartbeat(interval: float):
 func register_slash_command(command_name: String, description: String, options: Array = []):
   if guild_id.is_empty():
     push_error("guild_id is empty. If your command does not register, enable Developer Mode in Discord, copy the Server ID, and set it in the 'guild_id' field.");
-  var url = "https://discord.com/api/v9/applications/%s/guilds/%s/commands" % [user.id, guild_id] # Agregamos GUILD_ID
+  var url = "https://discord.com/api/v9/applications/%s/guilds/%s/commands" % [user.id, guild_id]
   var headers = [
     "Authorization: Bot %s" % token,
     "Content-Type: application/json"
