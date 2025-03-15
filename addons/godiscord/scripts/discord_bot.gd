@@ -48,6 +48,11 @@ func _ready():
 
   self.bot_ready.connect(on_ready)
 
+  if token.is_empty():
+    push_error("TOKEN is empty. Cannot connect to Discord.")
+  if token.length() < 50:
+    push_error("TOKEN may not be valid.")
+
 
 
 
@@ -297,7 +302,7 @@ func get_server_channels(guild:DiscordGuild)->Array[DiscordChannel]:
   DiscordRequestHandler.add_child(http_req)
   http_req.request_completed.connect(func(_r, _c, _h, _b): http_req.queue_free())
   
-  var error = await http_req.request(url, headers, HTTPClient.METHOD_GET)
+  var error = http_req.request(url, headers, HTTPClient.METHOD_GET)
   if error == OK:
     var response:Array = await http_req.request_completed
     var result:int = response[0]
