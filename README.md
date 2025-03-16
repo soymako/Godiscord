@@ -1,5 +1,5 @@
 # Godiscord
-![logo](https://github.com/user-attachments/assets/aaf807af-890c-49b1-9e9a-6d5504b777e8)
+![logo](https://github.com/soymako/pseudo_host/blob/main/makord.png)
 
 ## Make a Discord bot directly in the [Godot Game Engine](https://godotengine.org/)!
 
