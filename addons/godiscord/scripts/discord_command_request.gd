@@ -7,6 +7,14 @@ var name: String
 var options: Dictionary
 var caller: DiscordUser
 
+var channel: DiscordChannel
+var mentions: Array[DiscordUser]
+
+var id: String
+var embeds: Array[Dictionary]
+var component: DiscordComponent
+
+
 func reply(content: String):
   var url = "https://discord.com/api/v9/interactions/%s/%s/callback" % [interaction["id"], interaction["token"]]
   var headers = [

@@ -5,7 +5,7 @@ extends Resource
 @export var value:String
 @export var inline:bool
 
-func _init(name:String, value:String, inline:bool) -> void:
+func _init(name:String = "default", value:String = "default value", inline:bool = false) -> void:
   self.name = name
   self.value = value
   self.inline = inline

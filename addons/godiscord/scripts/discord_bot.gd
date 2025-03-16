@@ -18,6 +18,9 @@ extends Node
 
 ## Emitted when a message is recieved.
 signal message_recieved(message: DiscordMessage)
+
+signal message_interacted()
+
 ## Emitted when a slash command is used.
 signal command_used(command: DiscordCommandRequest)
 ## Emitted when the bot is ready.
@@ -47,11 +50,6 @@ func _ready():
   heartbeat_timer.timeout.connect(_heartbeat)
 
   self.bot_ready.connect(on_ready)
-
-  if token.is_empty():
-    push_error("TOKEN is empty. Cannot connect to Discord.")
-  if token.length() < 50:
-    push_error("TOKEN may not be valid.")
 
 
 
@@ -114,9 +112,17 @@ func _event_handler(payload: Dictionary):
   var event: String = payload["t"]
   var sequence: int = payload["s"]
   var data: Dictionary = payload["d"]
+  var type: int
+  
+  if data.has("type"):
+    type = data["type"]
+    debugPrint("type: " + str(data.get("type")))
+  debugPrint("Evento es: %s" %event)
+  
   
   sequence_number = sequence
   if event == "READY":
+    print("ready")
     user = DiscordUser.new()
     user.id = int(data["user"]["id"])
     user.name = data["user"]["username"]
@@ -128,6 +134,9 @@ func _event_handler(payload: Dictionary):
     var message = DiscordMessage.new()
     message.token = token
     message.content = data["content"]
+    #print("data: %s" %data)
+    #print("guild: %s" %data["guild_id"])
+    message.guild = await DiscordGuild.fromID(data["guild_id"], token)
     message.author = DiscordUser.new()
     message.author.id = int(data["author"]["id"])
 
@@ -147,23 +156,34 @@ func _event_handler(payload: Dictionary):
     message_recieved.emit(message)
     
   elif event == "INTERACTION_CREATE":
-    var options = {}
-
-    if data["data"].has("options"):
-      for i in data["data"]["options"]:
-        options[i["name"]] = i["value"]
-
+    var interaction_type: int = data.get("type", 0)
     var command_request = DiscordCommandRequest.new()
-    command_request.options = options
+    
+    # Configuración básica común
     command_request.token = token
     command_request.interaction = data
-    command_request.name = data["data"]["name"]
     command_request.caller = DiscordUser.new()
+    
+    # Manejar diferentes tipos de interacción
+    if data["data"].has("options"):
+        for i in data["data"]["options"]:
+            command_request.options[i["name"]] = i.get("value", null)
+    
+    command_request.name = data["data"].get("name", "")
     command_request.caller.id = data["member"]["user"]["id"]
-    command_request.caller.global_name = data["member"]["user"]["global_name"]
-    command_request.caller.name = data["member"]["user"]["username"]
+    command_request.caller.global_name = data["member"]["user"].get("global_name", "")
+    command_request.caller.name = data["member"]["user"].get("username", "")
     command_request.caller.mention = "<@%s>" % command_request.caller.id
+
+    var component_data = data["data"]
+    command_request.component = DiscordComponent.new()
+    command_request.component.type = component_data.get("component_type", 0)
+    command_request.component.custom_id = data["data"]["custom_id"]
+
+    # Emitir señal después de configurar todos los datos
     command_used.emit(command_request)
+    # debugPrint("Interacción procesada: %s" % str(data))
+    pass
 
 func get_guilds()->void:
   var url = "https://discord.com/api/v9/users/@me/guilds"
@@ -173,7 +193,7 @@ func get_guilds()->void:
   ]
   var http_req = HTTPRequest.new()
   DiscordRequestHandler.add_child(http_req)
-  http_req.request_completed.connect(func(_r, _c, _h, _b): print("request completed"); http_req.queue_free())
+  http_req.request_completed.connect(func(_r, _c, _h, _b): http_req.queue_free())
   var error = http_req.request(url, headers, HTTPClient.METHOD_GET)
 
   if error == OK:
@@ -198,12 +218,11 @@ func get_guilds()->void:
           var icon = obj.get("icon")
           if icon:
             guild.icon = obj.get("icon")
-          guild.permissions = obj.get("permissions") as int
           var features:Array = obj.get("features")
           if features.size() > 0:
             for _feature:String in features:
               guild.features.append(_feature)
-          guild.owner = obj.get("owner") as bool
+          guild.channels = await get_server_channels(guild)
           
           guilds.append(guild)
           print(obj)
@@ -267,8 +286,11 @@ func register_slash_command(command_name: String, description: String, options: 
 ## message -> The message to send
 ## channel -> The channel to send the message to
 ## embed -> Optional field used to send a discord embed
-func send_message(message:String, channel:DiscordChannel, embed:Dictionary = {})->void:
+func send_message(message:String, channel:DiscordChannel, embed:Dictionary = {}, components:Array[Dictionary] = [])->void:
   if channel == null: return
+
+  debugPrint("Sending message request: %s" % message)
+
   var url = "https://discord.com/api/v9/channels/%s/messages" % channel.id
   var headers = [
     "Authorization: Bot %s" % token,
@@ -279,6 +301,8 @@ func send_message(message:String, channel:DiscordChannel, embed:Dictionary = {})
   }
   if embed.size() > 0:
     payload["embeds"] = [embed]
+  if components.size() > 0:
+    payload["components"] = components
   var http_req = HTTPRequest.new()
   DiscordRequestHandler.add_child(http_req)
   http_req.request_completed.connect(func(_r, _c, _h, _b): http_req.queue_free())
@@ -302,7 +326,7 @@ func get_server_channels(guild:DiscordGuild)->Array[DiscordChannel]:
   DiscordRequestHandler.add_child(http_req)
   http_req.request_completed.connect(func(_r, _c, _h, _b): http_req.queue_free())
   
-  var error = http_req.request(url, headers, HTTPClient.METHOD_GET)
+  var error = await http_req.request(url, headers, HTTPClient.METHOD_GET)
   if error == OK:
     var response:Array = await http_req.request_completed
     var result:int = response[0]
@@ -340,9 +364,12 @@ func get_channel_of_name(guild:DiscordGuild, name:String)->DiscordChannel:
 func get_channel_of_id(guild:DiscordGuild, id:int)->DiscordChannel:
   var channel:DiscordChannel
   var channels:Array[DiscordChannel] = await get_server_channels(guild)
+  print("todos los canales: ", channels)
   for _c:DiscordChannel in channels:
+    #var same:bool = _c.id == id
+    #print("channelID: %s\nrequired: %s\n the same: %s" %[_c.id, id, same])
     if _c.id == id:
-      channel = _c
+      channel = _c as DiscordChannel
   return channel
 
 func get_guild_by_name(guild_name:String)->DiscordGuild:

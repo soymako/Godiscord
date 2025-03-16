@@ -12,10 +12,31 @@ var fields: Array[DiscordEmbedField]
 var footer_text: String
 var footer_icon_url: String
 
+func _init(
+author:String = "default",
+author_icon:String = "",
+thumbnail:String = "",
+title:String = "default title",
+description = "description not provided, using default",
+color = Color.RED,
+fields:Array[DiscordEmbedField] = [],
+footer:String = "default footer text",
+footer_icon:String = "") -> void:
+  self.author_name = author
+  self.author_icon_url = author_icon
+  self.thumbnail_url = thumbnail
+  self.title = title
+  self.description = description
+  self.color = color
+  self.fields = fields
+  self.footer_text = footer
+  self.footer_icon_url = footer_icon
+  pass
+
 func color_to_decimal(color: Color) -> int:
   return (int(color.r * 255) << 16) | (int(color.g * 255) << 8) | int(color.b * 255)
 
-func create()->Dictionary:
+func _parse()->Dictionary:
   var embed:Dictionary = {}
 
   if author_name or author_icon_url: embed["author"] = {

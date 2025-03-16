@@ -10,18 +10,61 @@ var name:String
 var icon:String
 var banner:String
 var permissions:int
-var features:Array[String]
-var owner:bool
+var features:Array
+
+var channels:Array[DiscordChannel]
 
 
-# func _init(id:int, name:String, icon:String, banner:String, permissions:int, features:Array[Features], owner:bool) -> void:
-#   self.id = id
-#   self.name = name
-#   self.icon = icon
-#   self.banner = banner
-#   self.permissions = permissions
-#   self.features = features
-#   self.owner = owner
+func _init(id:String = "-1", name:String = "", icon:String = "", banner:String = "", features:Array = []) -> void:
+  self.id = id
+  self.name = name
+  self.icon = icon if icon != null else ""
+  self.banner = banner if banner != null else ""
+  self.features = features
+
+static func fromID(id:String, token:String)->DiscordGuild:
+  var url = "https://discord.com/api/v9/guilds/%s" %id
+  var headers = [
+    "Authorization: Bot %s" % token,
+    "Content-Type: application/json"
+  ]
+  var http_req = HTTPRequest.new()
+  DiscordRequestHandler.add_child(http_req)
+  http_req.request_completed.connect(func(_r, _c, _h, _b): http_req.queue_free())
+  var error = http_req.request(url, headers, HTTPClient.METHOD_GET)
+  if error == OK:
+    var response = await http_req.request_completed
+    var code = response[1]
+    var body:PackedByteArray = response[3]
+    if code != 200: push_error("request failed"); return null
+    
+    var json:JSON = JSON.new()
+    json.parse(body.get_string_from_utf8())
+    
+    var data:Dictionary = json.data
+    #print("data: ", json.stringify(data))
+    
+    
+    var guild:DiscordGuild = DiscordGuild.new(
+      data["id"],
+      data["name"],
+      data["icon"] if data["icon"] != null else "",
+      data["banner"] if data["banner"] != null else "",
+      data["features"]
+    )
+    
+    #if data.has("icon"):
+      ##var icon = data["icon"]
+      ##print("icono: ", icon)
+      #guild.icon = data["icon"] if data["icon"] != null else ""
+    #if data.has("banner"):
+      ##guild.banner = data["banner"]
+      #pass
+    
+    
+    return guild
+    
+  return null
 
 # just... ignore this... I just think it would be better with autocomplete :P
 
