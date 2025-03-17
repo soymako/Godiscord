@@ -1,4 +1,4 @@
-@icon(res://addonds/godiscord/assets/discord_base.svg)
+@icon("res://addonds/godiscord/assets/discord_base.svg")
 class_name DiscordResource
 extends Resource
 
