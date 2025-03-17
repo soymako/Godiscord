@@ -1,3 +1,4 @@
+@icon(res://addonds/godiscord/assets/discord_base.svg)
 class_name DiscordBot
 extends Node
 ## The main entry point for Godiscord
