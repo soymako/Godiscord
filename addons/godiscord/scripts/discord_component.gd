@@ -1,3 +1,4 @@
+@icon("res://addons/godiscord/assets/discord_base.svg")
 class_name DiscordComponent
 extends Resource
 
